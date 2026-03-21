@@ -1,10 +1,9 @@
-databases:
-  - name: animbolt-redis
+services:
+  - type: redis
+    name: animbolt-redis
     plan: free
-    type: redis
     ipAllowList: []
 
-services:
   # ── Backend API ───────────────────────────────────────────────────────────
   - type: web
     name: animbolt-api
