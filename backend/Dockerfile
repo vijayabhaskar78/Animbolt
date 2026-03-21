@@ -24,5 +24,5 @@ RUN pip install --no-cache-dir -r /app/requirements.txt
 
 COPY . /app
 
-RUN mkdir -p /app/artifacts
+RUN mkdir -p /app/artifacts && chmod +x /app/start.sh
 
