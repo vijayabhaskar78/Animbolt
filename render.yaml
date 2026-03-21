@@ -1,9 +1,4 @@
 databases:
-  - name: animbolt-postgres
-    databaseName: cursor2d
-    user: cursor2d
-    plan: free
-
   - name: animbolt-redis
     plan: free
     type: redis
@@ -19,10 +14,6 @@ services:
     plan: free
     healthCheckPath: /health
     envVars:
-      - key: DATABASE_URL
-        fromDatabase:
-          name: animbolt-postgres
-          property: connectionString
       - key: REDIS_URL
         fromService:
           name: animbolt-redis
@@ -42,26 +33,30 @@ services:
         value: llama-3.3-70b-versatile
       - key: GROQ_BASE_URL
         value: https://api.groq.com/openai/v1
+      # Supabase S3-compatible storage
+      - key: S3_BUCKET
+        value: animbolt-artifacts
+      - key: S3_ENDPOINT_URL
+        value: https://lzeawbgggnrbhlqpvhxb.storage.supabase.co/storage/v1/s3
+      - key: AWS_ACCESS_KEY_ID
+        value: da9446d6f92b04951b93da3ea4872e60
       - key: AWS_REGION
-        value: auto
-      # ── Set these manually in the Render dashboard ──────────────────────
-      # JWT_SECRET_KEY   → generate: python -c "import secrets; print(secrets.token_urlsafe(32))"
+        value: ap-northeast-2
+      # ── Set these manually in Render dashboard ───────────────────────────
+      # DATABASE_URL  → postgresql://postgres:<password>@db.lzeawbgggnrbhlqpvhxb.supabase.co:5432/postgres
+      - key: DATABASE_URL
+        sync: false
+      # JWT_SECRET_KEY → python -c "import secrets; print(secrets.token_urlsafe(32))"
       - key: JWT_SECRET_KEY
         sync: false
-      # GROQ_API_KEY     → from console.groq.com
+      # GROQ_API_KEY → from console.groq.com
       - key: GROQ_API_KEY
         sync: false
-      # EXTRA_CORS_ORIGINS → https://animbolt-web.onrender.com  (set after web deploys)
-      - key: EXTRA_CORS_ORIGINS
-        sync: false
-      # Cloudflare R2 credentials
-      - key: S3_BUCKET
-        sync: false
-      - key: S3_ENDPOINT_URL
-        sync: false
-      - key: AWS_ACCESS_KEY_ID
-        sync: false
+      # AWS_SECRET_ACCESS_KEY → your Supabase S3 secret access key
       - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      # EXTRA_CORS_ORIGINS → https://animbolt-web.onrender.com (set after web deploys)
+      - key: EXTRA_CORS_ORIGINS
         sync: false
 
   # ── Celery Worker ─────────────────────────────────────────────────────────
@@ -73,10 +68,6 @@ services:
     plan: free
     startCommand: celery -A app.workers.celery_app worker --loglevel=info -Q preview,export,default --concurrency=2
     envVars:
-      - key: DATABASE_URL
-        fromDatabase:
-          name: animbolt-postgres
-          property: connectionString
       - key: REDIS_URL
         fromService:
           name: animbolt-redis
@@ -96,17 +87,19 @@ services:
         value: llama-3.3-70b-versatile
       - key: GROQ_BASE_URL
         value: https://api.groq.com/openai/v1
+      - key: S3_BUCKET
+        value: animbolt-artifacts
+      - key: S3_ENDPOINT_URL
+        value: https://lzeawbgggnrbhlqpvhxb.storage.supabase.co/storage/v1/s3
+      - key: AWS_ACCESS_KEY_ID
+        value: da9446d6f92b04951b93da3ea4872e60
       - key: AWS_REGION
-        value: auto
+        value: ap-northeast-2
+      - key: DATABASE_URL
+        sync: false
       - key: JWT_SECRET_KEY
         sync: false
       - key: GROQ_API_KEY
-        sync: false
-      - key: S3_BUCKET
-        sync: false
-      - key: S3_ENDPOINT_URL
-        sync: false
-      - key: AWS_ACCESS_KEY_ID
         sync: false
       - key: AWS_SECRET_ACCESS_KEY
         sync: false
@@ -121,6 +114,6 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      # NEXT_PUBLIC_API_BASE_URL → https://animbolt-api.onrender.com  (set after API deploys)
+      # NEXT_PUBLIC_API_BASE_URL → https://animbolt-api.onrender.com (set after API deploys)
       - key: NEXT_PUBLIC_API_BASE_URL
         sync: false
