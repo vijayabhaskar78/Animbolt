@@ -62,10 +62,9 @@ services:
   - type: worker
     name: animbolt-worker
     runtime: docker
-    dockerfilePath: ./backend/Dockerfile
+    dockerfilePath: ./backend/Dockerfile.worker
     dockerContext: ./backend
     plan: free
-    startCommand: celery -A app.workers.celery_app worker --loglevel=info -Q preview,export,default --concurrency=2
     envVars:
       - key: REDIS_URL
         fromService:
