@@ -61,6 +61,10 @@ class Settings(BaseSettings):
             "http://127.0.0.1",
         ]
     )
+    # Extra origins appended at runtime — comma-separated, set via EXTRA_CORS_ORIGINS env var.
+    # Use this to add your production frontend URL without changing default list.
+    # e.g. EXTRA_CORS_ORIGINS=https://animbolt-web.onrender.com,https://yourdomain.com
+    extra_cors_origins: str = ""
 
     _WEAK_JWT_SECRETS = {"change-me", "change-me-in-prod", "secret", ""}
 

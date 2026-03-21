@@ -1,0 +1,126 @@
+databases:
+  - name: animbolt-postgres
+    databaseName: cursor2d
+    user: cursor2d
+    plan: free
+
+  - name: animbolt-redis
+    plan: free
+    type: redis
+    ipAllowList: []
+
+services:
+  # ── Backend API ───────────────────────────────────────────────────────────
+  - type: web
+    name: animbolt-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: animbolt-postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: animbolt-redis
+          type: redis
+          property: connectionString
+      - key: ENVIRONMENT
+        value: production
+      - key: ARTIFACTS_DIR
+        value: /app/artifacts
+      - key: SIMULATE_RENDER
+        value: false
+      - key: MAX_SCENE_DURATION_SEC
+        value: 60
+      - key: LLM_PROVIDER
+        value: groq
+      - key: GROQ_MODEL
+        value: llama-3.3-70b-versatile
+      - key: GROQ_BASE_URL
+        value: https://api.groq.com/openai/v1
+      - key: AWS_REGION
+        value: auto
+      # ── Set these manually in the Render dashboard ──────────────────────
+      # JWT_SECRET_KEY   → generate: python -c "import secrets; print(secrets.token_urlsafe(32))"
+      - key: JWT_SECRET_KEY
+        sync: false
+      # GROQ_API_KEY     → from console.groq.com
+      - key: GROQ_API_KEY
+        sync: false
+      # EXTRA_CORS_ORIGINS → https://animbolt-web.onrender.com  (set after web deploys)
+      - key: EXTRA_CORS_ORIGINS
+        sync: false
+      # Cloudflare R2 credentials
+      - key: S3_BUCKET
+        sync: false
+      - key: S3_ENDPOINT_URL
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+
+  # ── Celery Worker ─────────────────────────────────────────────────────────
+  - type: worker
+    name: animbolt-worker
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    startCommand: celery -A app.workers.celery_app worker --loglevel=info -Q preview,export,default --concurrency=2
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: animbolt-postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: animbolt-redis
+          type: redis
+          property: connectionString
+      - key: ENVIRONMENT
+        value: production
+      - key: ARTIFACTS_DIR
+        value: /app/artifacts
+      - key: SIMULATE_RENDER
+        value: false
+      - key: MAX_SCENE_DURATION_SEC
+        value: 60
+      - key: LLM_PROVIDER
+        value: groq
+      - key: GROQ_MODEL
+        value: llama-3.3-70b-versatile
+      - key: GROQ_BASE_URL
+        value: https://api.groq.com/openai/v1
+      - key: AWS_REGION
+        value: auto
+      - key: JWT_SECRET_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: S3_BUCKET
+        sync: false
+      - key: S3_ENDPOINT_URL
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+
+  # ── Frontend (Next.js) ────────────────────────────────────────────────────
+  - type: web
+    name: animbolt-web
+    runtime: docker
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
+    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # NEXT_PUBLIC_API_BASE_URL → https://animbolt-api.onrender.com  (set after API deploys)
+      - key: NEXT_PUBLIC_API_BASE_URL
+        sync: false
