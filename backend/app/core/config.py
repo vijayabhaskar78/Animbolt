@@ -66,8 +66,6 @@ class Settings(BaseSettings):
     # e.g. EXTRA_CORS_ORIGINS=https://animbolt-web.onrender.com,https://yourdomain.com
     extra_cors_origins: str = ""
 
-    _WEAK_JWT_SECRETS = {"change-me", "change-me-in-prod", "secret", ""}
-
     @field_validator("debug", mode="before")
     @classmethod
     def parse_debug(cls, value):  # type: ignore[no-untyped-def]
@@ -78,8 +76,9 @@ class Settings(BaseSettings):
     @field_validator("jwt_secret_key", mode="after")
     @classmethod
     def validate_jwt_secret(cls, v: str, info) -> str:  # type: ignore[no-untyped-def]
+        _weak = {"change-me", "change-me-in-prod", "secret", ""}
         env = (info.data or {}).get("environment", "local")
-        if env == "production" and v in Settings._WEAK_JWT_SECRETS:
+        if env == "production" and v in _weak:
             raise ValueError(
                 "JWT_SECRET_KEY must be set to a strong random secret in production. "
                 "Generate one with: python -c \"import secrets; print(secrets.token_urlsafe(32))\""
