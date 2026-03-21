@@ -1,0 +1,14 @@
+alembic==1.14.1
+boto3==1.35.99
+celery[redis]==5.4.0
+edge-tts==6.1.13
+fastapi==0.115.7
+httpx==0.28.1
+manim==0.20.1
+orjson==3.10.15
+psycopg2-binary==2.9.10
+pydantic-settings==2.8.1
+python-multipart==0.0.20
+redis==5.2.1
+sqlalchemy==2.0.37
+uvicorn[standard]==0.34.0

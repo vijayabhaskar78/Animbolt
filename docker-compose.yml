@@ -1,0 +1,106 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-cursor2d}
+      POSTGRES_USER: ${POSTGRES_USER:-cursor2d}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cursor2d}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-cursor2d}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "6379:6379"
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+      ARTIFACTS_DIR: /app/artifacts
+      GROQ_MODEL: moonshotai/kimi-k2-instruct-0905
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    volumes:
+      - ./backend:/app
+      - artifacts:/app/artifacts
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+      ARTIFACTS_DIR: /app/artifacts
+      GROQ_MODEL: moonshotai/kimi-k2-instruct-0905
+    command: celery -A app.workers.celery_app.celery_app worker -l info -Q preview,export,default
+    volumes:
+      - ./backend:/app
+      - artifacts:/app/artifacts
+    depends_on:
+      api:
+        condition: service_started
+      redis:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8000}
+    command: npm run dev -- --hostname 0.0.0.0 --port 3000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      api:
+        condition: service_started
+    ports:
+      - "3000:3000"
+
+  proxy:
+    image: caddy:2-alpine
+    depends_on:
+      - web
+      - api
+    volumes:
+      - ./infra/Caddyfile:/etc/caddy/Caddyfile:ro
+    ports:
+      - "80:80"
+
+volumes:
+  postgres_data:
+  redis_data:
+  artifacts:

@@ -1,0 +1,47 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+.next/
+dist/
+build/
+coverage/
+tsconfig.tsbuildinfo
+
+# Environment & secrets — NEVER commit these
+.env
+.env.*
+!.env.example
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Render artifacts / generated videos
+artifacts/
+backend/artifacts/
+
+# Dev/test scratch files
+backend/quality_tests/
+media/
+tmp/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude Code / AI tooling — local only
+.claude/
+.swarm/
+.mcp.json
+CLAUDE.md
