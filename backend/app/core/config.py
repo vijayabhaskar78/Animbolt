@@ -59,6 +59,9 @@ class Settings(BaseSettings):
             "http://127.0.0.1:3005",
             "http://localhost",
             "http://127.0.0.1",
+            # Production frontend
+            "https://animbolt.vercel.app",
+            "https://animbolt-api.onrender.com",
         ]
     )
     # Extra origins appended at runtime — comma-separated, set via EXTRA_CORS_ORIGINS env var.
