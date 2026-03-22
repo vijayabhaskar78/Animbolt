@@ -33,6 +33,7 @@ export default function GeneratePage() {
   const [loading, setLoading] = useState(false);
   const [projectLoaded, setProjectLoaded] = useState(false);
   const autoStarted = useRef(false);
+  const autoPromptRef = useRef(searchParams.get("prompt"));
 
   const selectedScene = scenes.find((s) => s.id === selectedSceneId) ?? null;
 
@@ -105,7 +106,7 @@ export default function GeneratePage() {
   // ── Auto-start from landing page prompt ───────────────────────────────────
   useEffect(() => {
     if (!projectLoaded) return;
-    const autoPrompt = searchParams.get("prompt");
+    const autoPrompt = autoPromptRef.current;
     if (!autoPrompt || autoStarted.current) return;
     // Project already has scenes (e.g. page refresh) — clear the spinner and show the video
     if (scenes.length > 0) {
