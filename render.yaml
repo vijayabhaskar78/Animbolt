@@ -41,6 +41,8 @@ services:
         value: da9446d6f92b04951b93da3ea4872e60
       - key: AWS_REGION
         value: ap-northeast-2
+      - key: S3_PUBLIC_BASE_URL
+        value: https://lzeawbgggnrbhlqpvhxb.supabase.co/storage/v1/object/public/animbolt-artifacts
       # ── Set these in Render dashboard ────────────────────────────────────
       - key: DATABASE_URL
         sync: false

@@ -42,6 +42,9 @@ class Settings(BaseSettings):
     aws_access_key_id: str = ""
     aws_secret_access_key: str = ""
     aws_region: str = "us-east-1"
+    # If the bucket is public, set this to serve files via direct URL instead of presigned URLs.
+    # For Supabase: https://<project>.supabase.co/storage/v1/object/public/<bucket>
+    s3_public_base_url: str = ""
 
     cors_origins: list[str] = Field(
         default_factory=lambda: [

@@ -54,14 +54,19 @@ def upload(local_path: Path) -> None:
 
 def get_presigned_url(key: str, expires_in: int = 3600) -> str | None:
     """
-    Return a presigned GET URL for *key*. Returns None when S3 is not configured.
+    Return a URL for *key*. Uses direct public URL when s3_public_base_url is set,
+    otherwise falls back to a presigned URL. Returns None when S3 is not configured.
     """
     if not is_configured():
         return None
+    settings = get_settings()
+    # Public bucket — return direct URL (no expiry, no signing overhead)
+    if settings.s3_public_base_url:
+        return f"{settings.s3_public_base_url.rstrip('/')}/{key}"
     try:
         return _client().generate_presigned_url(
             "get_object",
-            Params={"Bucket": get_settings().s3_bucket, "Key": key},
+            Params={"Bucket": settings.s3_bucket, "Key": key},
             ExpiresIn=expires_in,
         )
     except Exception:  # noqa: BLE001
