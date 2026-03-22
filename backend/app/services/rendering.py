@@ -145,6 +145,7 @@ def _log_manim_error(job_dir: Path, stderr: str, stdout: str, extra: str = "") -
 
 def run_render(script_path: Path, output_path: Path, hd: bool = False) -> None:
     settings = get_settings()
+    print(f"DEBUG run_render: simulate_render={settings.simulate_render!r}", flush=True)
     if settings.simulate_render:
         _write_placeholder_video(output_path)
         return
