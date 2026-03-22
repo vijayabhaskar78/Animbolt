@@ -139,7 +139,8 @@ def _log_manim_error(job_dir: Path, stderr: str, stdout: str, extra: str = "") -
     except Exception:
         pass
 
-    logger.error("Manim render failed in %s: %s\nSTDERR: %s", job_dir, extra, stderr[:1000])
+    logger.error("Manim render failed in %s: %s\nSTDERR: %s", job_dir, extra, stderr[:2000])
+    print(f"MANIM_ERROR [{job_dir.name}]: {extra}\nSTDERR: {stderr[:2000]}", flush=True)
 
 
 def run_render(script_path: Path, output_path: Path, hd: bool = False) -> None:
