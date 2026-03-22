@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     ollama_model: str = "qwen3.5:9b"
 
     artifacts_dir: Path = Field(default=Path("./artifacts"))
-    simulate_render: bool = True
+    simulate_render: bool = False
     max_scene_duration_sec: int = 60
 
     # S3-compatible object storage (optional — leave blank to use local disk)
