@@ -13,6 +13,8 @@ export function formatDuration(seconds: number): string {
 
 export function assetUrl(storagePath: string): string {
   if (storagePath.startsWith("http")) return storagePath;
+  const artifactBase = process.env.NEXT_PUBLIC_ARTIFACT_BASE_URL;
+  if (artifactBase) return `${artifactBase.replace(/\/$/, "")}/${storagePath}`;
   const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
   return `${base}/artifacts/${storagePath}`;
 }
