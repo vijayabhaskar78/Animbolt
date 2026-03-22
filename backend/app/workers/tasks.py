@@ -35,7 +35,7 @@ from sqlalchemy import and_
 
 from app.core.config import get_settings
 from app.db import session as _db_session
-from app.models import asset, composition, project, render_job, scene, scene_version, user  # noqa: F401
+from app.models import asset, chat_message, composition, project, render_job, scene, scene_version, user  # noqa: F401
 from app.models.asset import Asset
 from app.models.composition import Composition
 from app.models.project import Project
