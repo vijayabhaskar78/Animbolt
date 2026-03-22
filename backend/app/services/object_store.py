@@ -7,7 +7,10 @@ endpoint such as MinIO/R2) and served via presigned redirect URLs.
 When S3_BUCKET is empty (default), files stay on local disk and are served by
 FastAPI's StaticFiles mount at /artifacts/.
 """
+import logging
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 try:
     import boto3
@@ -47,9 +50,9 @@ def upload(local_path: Path) -> None:
     key = to_storage_path(local_path)
     try:
         _client().upload_file(str(local_path), get_settings().s3_bucket, key)
-    except Exception:  # noqa: BLE001
-        # Degrade gracefully — local file still exists for direct serving.
-        pass
+        logger.info("S3 upload succeeded: %s → %s", local_path, key)
+    except Exception as exc:  # noqa: BLE001
+        logger.error("S3 upload FAILED for %s: %s", local_path, exc)
 
 
 def get_presigned_url(key: str, expires_in: int = 3600) -> str | None:
